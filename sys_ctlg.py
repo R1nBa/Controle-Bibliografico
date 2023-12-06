@@ -59,6 +59,10 @@ class auth:
 # Função para guardar novamente os livros emprestados em "emprestados.csv"
     def exp_emp_csv(self):
         self.emp_df.to_csv("emprestados.csv",index=False)
+#Função do comprovante de empréstimo e devolução
+    def cpv_emp_dev(self,act):
+        with open("comprovante.txt", "a") as arq:
+            arq.write(f"{self.usr_lgd['Nome'].iloc[0]}: {act}\n")
 # Menu de opções após a autenticação do usuário
     def esc_opcs(self):
         self.opcs=tk.Toplevel(self.base)
@@ -112,6 +116,8 @@ class auth:
         usr=self.entr_usr.get()
         pwd=self.entr_pwd.get()
         usr_inf=self.usr_df[(self.usr_df["Nome"]==usr)&(self.usr_df["Senha"]==pwd)]
+        with open("comprovante.txt", "w") as cpv_arq:
+            cpv_arq.write("")
         if not usr_inf.empty:
             self.usr_lgd=usr_inf
             messagebox.showinfo("Login bem-sucedido", f"Bem-vindo,{usr}!")
@@ -177,6 +183,7 @@ class auth:
             nv_emp=pd.DataFrame({"ID do Livro":[id_lvr_esc],"ID do Usuário":[self.usr_lgd["ID"].iloc[0]]})
             self.emp_df=pd.concat([self.emp_df,nv_emp],ignore_index=True)
             self.exp_emp_csv()
+            self.cpv_emp_dev(f"Empréstimo - Livro ID {id_lvr_esc}")
             messagebox.showinfo("Empréstimo realizado",f"Livro ID {id_lvr_esc} emprestado com sucesso!")
         else:
             messagebox.showerror("Erro no empréstimo","ID do livro inválido. Tente novamente.")
@@ -196,7 +203,8 @@ class auth:
                 if not lvr_cmp.empty:
                     self.lvr_df.at[lvr_cmp.index[0],"Quantidade"]+=1
                     self.exp_lvr_csv()
-                messagebox.showinfo("Devolução de Livro",f"Livro ID {id_lvr_dev} devolvido com sucesso!")
+                    self.cpv_emp_dev(f"Devolução - Livro ID {id_lvr_dev}")
+                    messagebox.showinfo("Devolução de Livro",f"Livro ID {id_lvr_dev} devolvido com sucesso!")
             else:
                 messagebox.showerror("Devolução de Livro", "Livro não encontrado nos empréstimos.")
     # Função para exibir o relátorio dos livros mais emprestados
